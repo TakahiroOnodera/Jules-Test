@@ -5,55 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>パスワード生成ツール</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; padding: 2em; }
-        .form-group { margin-bottom: 1em; }
-        label { display: block; margin-bottom: 0.5em; }
-        input[type="text"], input[type="number"] { padding: 0.5em; width: 200px; }
-        .result { margin-top: 1.5em; padding: 1em; background-color: #f0f0f0; border: 1px solid #ccc; }
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --text-color: #343a40;
+            --container-bg: #ffffff;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2em;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--container-bg);
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 1.5em;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5em;
+        }
+
+        .checkbox-group label, .radio-group label {
+            display: inline-block;
+            font-weight: normal;
+            margin-right: 1.5em;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.75em;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 0.8em;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 2em;
+            padding: 1.5em;
+            background-color: #e9f5ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        #password-output {
+            font-weight: bold;
+            font-size: 1.5em;
+            color: var(--primary-color);
+            word-wrap: break-word;
+            user-select: all; /* Allow easy copying */
+        }
     </style>
 </head>
 <body>
-    <h1>パスワード生成ツール</h1>
+    <div class="container">
+        <h1>パスワード生成ツール</h1>
 
-    <form id="password-form">
-        <div class="form-group">
-            <label>使用する文字の種類（複数選択可）:</label>
-            <input type="checkbox" id="upper" name="char_types" value="upper" checked>
-            <label for="upper">英語（大文字）</label>
-            <input type="checkbox" id="lower" name="char_types" value="lower" checked>
-            <label for="lower">英語（小文字）</label>
-            <input type="checkbox" id="numbers" name="char_types" value="numbers" checked>
-            <label for="numbers">数字</label>
-            <input type="checkbox" id="symbols" name="char_types" value="symbols" checked>
-            <label for="symbols">記号</label>
+        <div class="instructions" style="margin-bottom: 2em; padding: 1em; background-color: #f8f9fa; border-radius: 4px;">
+            <h4>使い方</h4>
+            <ol style="padding-left: 1.5em;">
+                <li>パスワードに含めたい文字種（大文字、小文字など）を選択します。</li>
+                <li>パスワードの長さを選びます。</li>
+                <li>（任意）覚えやすい単語を入力すると、それがパスワードのベースになります。</li>
+                <li>「パスワードを生成」ボタンをクリックして、結果を取得します。</li>
+            </ol>
         </div>
 
-        <div class="form-group">
-            <label>文字数:</label>
-            <input type="radio" id="len8" name="length_option" value="8" checked>
-            <label for="len8">8</label>
-            <input type="radio" id="len10" name="length_option" value="10">
-            <label for="len10">10</label>
-            <input type="radio" id="len12" name="length_option" value="12">
-            <label for="len12">12</label>
-            <input type="radio" id="len_other" name="length_option" value="other">
-            <label for="len_other">その他:</label>
-            <input type="number" id="custom_length" name="custom_length" min="4" max="100" value="12" style="width: 60px;">
+        <form id="password-form">
+            <div class="form-group">
+                <label>使用する文字の種類:</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="upper" name="char_types" value="upper" checked>
+                    <label for="upper">英語（大文字）</label>
+                    <input type="checkbox" id="lower" name="char_types" value="lower" checked>
+                    <label for="lower">英語（小文字）</label>
+                    <input type="checkbox" id="numbers" name="char_types" value="numbers" checked>
+                    <label for="numbers">数字</label>
+                    <input type="checkbox" id="symbols" name="char_types" value="symbols" checked>
+                    <label for="symbols">記号</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>文字数:</label>
+                <div class="radio-group">
+                    <input type="radio" id="len8" name="length_option" value="8" checked>
+                    <label for="len8">8</label>
+                    <input type="radio" id="len10" name="length_option" value="10">
+                    <label for="len10">10</label>
+                    <input type="radio" id="len12" name="length_option" value="12">
+                    <label for="len12">12</label>
+                    <input type="radio" id="len_other" name="length_option" value="other">
+                    <label for="len_other">その他:</label>
+                    <input type="number" id="custom_length" name="custom_length" min="4" max="100" value="12" style="width: 80px; display: inline-block; vertical-align: middle;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="base_word">覚えやすい単語（任意）:</label>
+                <input type="text" id="base_word" name="base_word" placeholder="例: Apple">
+            </div>
+
+            <button type="submit">パスワードを生成</button>
+        </form>
+
+        <div id="result-container" class="result" style="display: none;">
+            <h3>生成されたパスワード:</h3>
+            <p id="password-output"></p>
         </div>
-
-        <div class="form-group">
-            <label for="base_word">覚えやすい単語（任意）:</label>
-            <input type="text" id="base_word" name="base_word" placeholder="例: Apple">
-        </div>
-
-        <button type="submit">パスワードを生成</button>
-    </form>
-
-    <div id="result-container" class="result" style="display: none;">
-        <h3>生成されたパスワード:</h3>
-        <p id="password-output" style="font-weight: bold; font-size: 1.2em;"></p>
     </div>
-
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

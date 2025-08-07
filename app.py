@@ -76,7 +76,13 @@ def generate_password(char_types, length, base_word):
         password_chars = password_chars[:length]
         app.logger.debug(f"長さを{length}に調整後: {''.join(password_chars)}")
 
-    # 6. パスワードをシャッフル
+    # 6. 大文字・小文字をランダムに変換 (50%の確率)
+    for i, char in enumerate(password_chars):
+        if char.isalpha() and random.random() < 0.5:
+            password_chars[i] = char.swapcase()
+    app.logger.debug(f"大文字小文字変換後: {''.join(password_chars)}")
+
+    # 7. パスワードをシャッフル
     random.shuffle(password_chars)
     final_password = "".join(password_chars)
 
