@@ -1,64 +1,35 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('password-form');
-    const resultContainer = document.getElementById('result-container');
-    const passwordOutput = document.getElementById('password-output');
-    const customLengthInput = document.getElementById('custom_length');
-    const otherLengthRadio = document.getElementById('len_other');
+document.addEventListener('DOMContentLoaded', function() {
+    const newsList = document.getElementById('news-list');
 
-    // 「その他」の文字数入力が変更されたら、対応するラジオボタンを選択状態にする
-    customLengthInput.addEventListener('input', () => {
-        otherLengthRadio.checked = true;
-    });
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // デフォルトのフォーム送信をキャンセル
-
-        // 1. フォームからデータを収集
-        const charTypes = Array.from(document.querySelectorAll('input[name="char_types"]:checked'))
-                               .map(cb => cb.value);
-
-        let length;
-        const lengthOption = document.querySelector('input[name="length_option"]:checked').value;
-        if (lengthOption === 'other') {
-            length = parseInt(customLengthInput.value, 10);
-        } else {
-            length = parseInt(lengthOption, 10);
-        }
-
-        const baseWord = document.getElementById('base_word').value;
-
-        // 2. バックエンドにデータを送信
-        try {
-            const response = await fetch('/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    char_types: charTypes,
-                    length: length,
-                    base_word: baseWord
-                }),
-            });
-
+    // バックエンドAPIからニュースデータを非同期で取得する
+    fetch('/api/news')
+        .then(response => {
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'パスワードの生成に失敗しました。');
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(newsData => {
+            // ニュースデータが空の場合のメッセージ
+            if (!newsData || newsData.length === 0) {
+                newsList.innerHTML = '<li>ニュース記事が見つかりませんでした。</li>';
+                return;
             }
 
-            const data = await response.json();
+            // 取得したデータでリストを生成
+            newsData.forEach(article => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = article.url;
+                link.textContent = article.title;
+                link.target = '_blank'; // 新しいタブで開く
 
-            // 3. 結果を表示
-            if (data.password) {
-                passwordOutput.textContent = data.password;
-                resultContainer.style.display = 'block';
-            } else if (data.error) {
-                 throw new Error(data.error);
-            }
-
-        } catch (error) {
-            passwordOutput.textContent = `エラー: ${error.message}`;
-            resultContainer.style.display = 'block';
-        }
-    });
+                listItem.appendChild(link);
+                newsList.appendChild(listItem);
+            });
+        })
+        .catch(error => {
+            console.error('ニュースの取得に失敗しました:', error);
+            newsList.innerHTML = '<li>ニュースの読み込み中にエラーが発生しました。</li>';
+        });
 });
